@@ -296,21 +296,6 @@ export default function ProfilePage() {
                           className="w-full"
                         />
                       </div>
-
-                      {/* Campo de correo solo lectura */}
-                      <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="correo" className="text-sm font-medium">Correo Electrónico</Label>
-                        <Input
-                          id="correo"
-                          type="email"
-                          value={user.correo}
-                          disabled
-                          className="w-full bg-gray-100 text-gray-600 cursor-not-allowed"
-                        />
-                        <p className="text-xs text-gray-500">
-                          El correo electrónico no se puede modificar
-                        </p>
-                      </div>
                     </div>
 
                     <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4">

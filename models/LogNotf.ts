@@ -3,7 +3,7 @@ import mongoose from "mongoose"
 const LogNotfSchema = new mongoose.Schema({
   fechaHora: {
     type: Date,
-    default: Date.now,
+    required: true,
   },
   tipo: {
     type: String,
@@ -24,14 +24,15 @@ const LogNotfSchema = new mongoose.Schema({
     enum: ["mayor", "menor"],
   },
   idComponente: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Componentes",
+    type: Number, // ✅ Es int según el schema
     required: true,
   },
   idInfoIncubadora: {
     type: Number,
-    default: 1,
+    required: false, // Campo opcional
   },
+}, {
+  collection: 'LOGNOTF' // ✅ Especificar nombre de colección explícitamente
 })
 
 export default mongoose.models.LogNotf || mongoose.model("LogNotf", LogNotfSchema)

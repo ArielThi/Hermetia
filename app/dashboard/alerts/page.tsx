@@ -3,17 +3,13 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import {
   Bell,
-  Download,
   Droplets,
-  FileJson,
-  FileSpreadsheet,
   RotateCcw,
   Save,
   Settings,
@@ -38,14 +34,15 @@ interface ActuatorAlert {
   mensaje: string
 }
 
+// Interfaz corregida para coincidir con el modelo LogNotf.ts y el schema real
 interface ThresholdAlert {
   _id: string
-  fechaRegistro: string
+  fechaHora: string // Cambiado de fechaRegistro a fechaHora
   tipo: string
   valor: number
   umbral: number
   condicion: string
-  idComponente: number
+  idComponente: number // Mantener como number según el schema real
   nombreComponente: string
   mensaje: string
 }
@@ -196,54 +193,6 @@ export default function AlertsPage() {
     // Limpiar errores cuando el usuario empiece a escribir
     if (errors.length > 0) {
       setErrors([])
-    }
-  }
-
-  const handleExportAlerts = async (type: "actuators" | "thresholds", format: "csv" | "json" | "pdf") => {
-    try {
-      const alerts = type === "actuators" ? actuatorAlerts : thresholdAlerts
-
-      if (format === "csv") {
-        const csvHeader =
-          type === "actuators"
-            ? "Fecha,Hora,Actuador,Tipo,Mensaje\n"
-            : "Fecha,Hora,Parámetro,Valor,Umbral,Condición,Componente,Mensaje\n"
-
-        const csvData = alerts
-          .map((alert) => {
-            const date = new Date(alert.fechaRegistro)
-            if (type === "actuators") {
-              const actuatorAlert = alert as ActuatorAlert
-              return `${date.toLocaleDateString("es-ES")},${date.toLocaleTimeString("es-ES")},${actuatorAlert.nombreActuador},${actuatorAlert.tipo},${actuatorAlert.mensaje}`
-            } else {
-              const thresholdAlert = alert as ThresholdAlert
-              return `${date.toLocaleDateString("es-ES")},${date.toLocaleTimeString("es-ES")},${thresholdAlert.tipo},${thresholdAlert.valor},${thresholdAlert.umbral},${thresholdAlert.condicion},${thresholdAlert.nombreComponente},${thresholdAlert.mensaje}`
-            }
-          })
-          .join("\n")
-
-        const blob = new Blob([csvHeader + csvData], { type: "text/csv" })
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `alertas_${type}.csv`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-      } else if (format === "json") {
-        const blob = new Blob([JSON.stringify(alerts, null, 2)], { type: "application/json" })
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `alertas_${type}.json`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-      }
-    } catch (error) {
-      console.error("Error al exportar alertas:", error)
     }
   }
 
@@ -481,31 +430,11 @@ export default function AlertsPage() {
           <TabsContent value="actuadores" className="space-y-6">
             <Card className="shadow-lg border-0">
               <CardHeader className="pb-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-2xl mb-2">Historial de Uso de Actuadores</CardTitle>
-                    <CardDescription className="text-base">
-                      Registro de activaciones de actuadores del sistema
-                    </CardDescription>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="lg" className="px-6 bg-transparent">
-                        <Download className="w-5 h-5 mr-2" />
-                        Exportar
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => handleExportAlerts("actuators", "csv")}>
-                        <FileSpreadsheet className="w-4 h-4 mr-2" />
-                        CSV
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleExportAlerts("actuators", "json")}>
-                        <FileJson className="w-4 h-4 mr-2" />
-                        JSON
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <div>
+                  <CardTitle className="text-2xl mb-2">Historial de Uso de Actuadores</CardTitle>
+                  <CardDescription className="text-base">
+                    Registro de activaciones de actuadores del sistema
+                  </CardDescription>
                 </div>
               </CardHeader>
               <CardContent>
@@ -545,31 +474,11 @@ export default function AlertsPage() {
           <TabsContent value="umbrales" className="space-y-6">
             <Card className="shadow-lg border-0">
               <CardHeader className="pb-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-2xl mb-2">Historial de Alertas de Umbrales</CardTitle>
-                    <CardDescription className="text-base">
-                      Registro de valores fuera de los rangos configurados
-                    </CardDescription>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="lg" className="px-6 bg-transparent">
-                        <Download className="w-5 h-5 mr-2" />
-                        Exportar
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => handleExportAlerts("thresholds", "csv")}>
-                        <FileSpreadsheet className="w-4 h-4 mr-2" />
-                        CSV
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleExportAlerts("thresholds", "json")}>
-                        <FileJson className="w-4 h-4 mr-2" />
-                        JSON
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <div>
+                  <CardTitle className="text-2xl mb-2">Historial de Alertas de Umbrales</CardTitle>
+                  <CardDescription className="text-base">
+                    Registro de valores fuera de los rangos configurados
+                  </CardDescription>
                 </div>
               </CardHeader>
               <CardContent>
@@ -597,7 +506,7 @@ export default function AlertsPage() {
                             <div>
                               <p className="font-semibold text-base">{alert.mensaje}</p>
                               <p className="text-sm text-gray-500 mt-1">
-                                {formatDate(alert.fechaRegistro)} - {alert.nombreComponente}
+                                {formatDate(alert.fechaHora)} - {alert.nombreComponente}
                               </p>
                             </div>
                           </div>
